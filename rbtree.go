@@ -39,7 +39,7 @@ type rbNode struct {
     key RbKey
     value interface{}
     color byte
-    left, right, parent *rbNode
+    left, right *rbNode
 }
 
 // RbTree structure
@@ -165,11 +165,6 @@ func rotateLeft(node *rbNode) *rbNode {
     child.color = node.color
     node.color = red
 
-    node.parent = child
-    if node.right != nil {
-        node.right.parent = node
-    }
-
     return child
 }
 
@@ -181,11 +176,6 @@ func rotateRight(node *rbNode) *rbNode {
     child.color = node.color
     node.color = red
 
-    node.parent = child
-    if node.left != nil {
-        node.left.parent = node
-    }
-
     return child
 }
 
@@ -195,9 +185,6 @@ func moveRedLeft(node *rbNode) *rbNode {
     colorFlip(node)
     if isRed(node.right.left) {
         node.right = rotateRight(node.right)
-        if node.right != nil {
-            node.right.parent = node
-        }
         node = rotateLeft(node)
         colorFlip(node)
     }
@@ -238,9 +225,9 @@ func deleteMin(node *rbNode) *rbNode {
         node = moveRedLeft(node)
     }
     node.left = deleteMin(node.left)
-    if node.left != nil {
+    /* if node.left != nil {
         node.left.parent = node
-    }
+    } */
     return balance(node)
 }
 
@@ -328,7 +315,7 @@ func (tree *RbTree) Insert(key RbKey, value interface{}) {
     if key != nil {
         tree.root = tree.insertNode(tree.root, key, value);
         tree.root.color = black
-        tree.root.parent = nil
+        // tree.root.parent = nil
     }
 }
 
@@ -342,10 +329,10 @@ func (tree *RbTree) insertNode(node *rbNode, key RbKey, value interface{}) *rbNo
     switch key.ComparedTo(node.key) {
     case KeyIsLess:
         node.left  = tree.insertNode(node.left,  key, value)
-        node.left.parent = node
+        // node.left.parent = node
     case KeyIsGreater:
         node.right = tree.insertNode(node.right, key, value)
-        node.right.parent = node
+        // node.right.parent = node
     default:
         if tree.onInsert == nil {
             node.value = value
@@ -361,7 +348,6 @@ func (tree *RbTree) Delete(key RbKey) {
     tree.root = tree.deleteNode(tree.root, key)
     if tree.root != nil {
         tree.root.color = black
-        tree.root.parent = nil
     }
 }
 
@@ -377,9 +363,6 @@ func (tree *RbTree) deleteNode(node *rbNode, key RbKey) *rbNode {
             node = moveRedLeft(node)
         }
         node.left = tree.deleteNode(node.left, key)
-        if node.left != nil {
-            node.left.parent = node
-        }
     } else {
         if cmp == KeysAreEqual && tree.onDelete != nil {
             value := tree.onInsert(key, node.value)        
@@ -399,9 +382,6 @@ func (tree *RbTree) deleteNode(node *rbNode, key RbKey) *rbNode {
         
         if key.ComparedTo(node.key) != KeysAreEqual {
             node.right = tree.deleteNode(node.right, key)
-            if node.right != nil {
-                node.right.parent = node
-            }
         } else {
             if node.right == nil {
                 return nil
@@ -412,13 +392,8 @@ func (tree *RbTree) deleteNode(node *rbNode, key RbKey) *rbNode {
             node.value = rm.value
             node.right = deleteMin(node.right)
 
-            if node.right != nil {
-                node.right.parent = node
-            }
-            
             rm.left = nil
             rm.right = nil
-            rm.parent = nil
             
             tree.count--
         }
