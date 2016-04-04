@@ -101,11 +101,11 @@ func (context *rbIterationContext) inWalk() bool {
 }
 
 func (context *rbIterationContext) ready() bool {
-    return atomic.LoadInt32(&context.state) != iteratorReady
+    return atomic.LoadInt32(&context.state) == iteratorReady
 }
 
 func (context *rbIterationContext) Closed() bool {
-    return atomic.LoadInt32(&context.state) != iteratorClosed
+    return atomic.LoadInt32(&context.state) == iteratorClosed
 }
 
 func (context *rbIterationContext) Close() {
