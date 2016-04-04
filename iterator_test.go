@@ -119,7 +119,7 @@ func TestIterateMap(t *testing.T) {
     count = 0
     key := mapIntKey(900001)
     for k := range tree {
-        cmp := int8(key.ComparedTo(k))
+        cmp := int8(k.ComparedTo(key))
         if cmp < zeroOrEqualKey {
             count++
         }
@@ -131,7 +131,7 @@ func TestIterateMap(t *testing.T) {
     count = 0
     key = mapIntKey(100000)
     for k := range tree {
-        cmp := int8(key.ComparedTo(k))
+        cmp := int8(k.ComparedTo(key))
         if cmp > zeroOrEqualKey {
             count++
         }
@@ -143,7 +143,7 @@ func TestIterateMap(t *testing.T) {
     count = 0
     key = mapIntKey(1000000)
     for k := range tree {
-        cmp := int8(key.ComparedTo(k))
+        cmp := int8(k.ComparedTo(key))
         if cmp <= zeroOrEqualKey {
             count++
         }
@@ -155,7 +155,7 @@ func TestIterateMap(t *testing.T) {
     count = 0
     key = mapIntKey(0)
     for k := range tree {
-        cmp := int8(key.ComparedTo(k))
+        cmp := int8(k.ComparedTo(key))
         if cmp >= zeroOrEqualKey {
             count++
         }
