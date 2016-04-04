@@ -190,7 +190,7 @@ func (context *rbIterationContext) All() (int, error) {
     return context.CurrentCount(), nil
 }
 
-func (context *rbIterationContext) walkAll(node *RbNode) {
+func (context *rbIterationContext) walkAll(node *rbNode) {
     if node == nil || !context.inWalk() {
         return
     }
@@ -246,7 +246,7 @@ func (context *rbIterationContext) Between(loKey RbKey, hiKey RbKey) (int, error
     return context.CurrentCount(), nil
 }
 
-func (context *rbIterationContext) walkBetween(node *RbNode, loKey RbKey, hiKey RbKey) {
+func (context *rbIterationContext) walkBetween(node *rbNode, loKey RbKey, hiKey RbKey) {
     if node == nil || !context.inWalk() {
         return
     }
@@ -295,7 +295,7 @@ func (context *rbIterationContext) LessOrEqual(key RbKey) (int, error) {
     return context.CurrentCount(), nil
 }
 
-func (context *rbIterationContext) walkLessOrEqual(node *RbNode, key RbKey) {
+func (context *rbIterationContext) walkLessOrEqual(node *rbNode, key RbKey) {
     if node == nil || !context.inWalk() {
         return
     }
@@ -339,7 +339,7 @@ func (context *rbIterationContext) GreaterOrEqual(key RbKey) (int, error) {
     return context.CurrentCount(), nil
 }
 
-func (context *rbIterationContext) walkGreaterOrEqual(node *RbNode, key RbKey) {
+func (context *rbIterationContext) walkGreaterOrEqual(node *rbNode, key RbKey) {
     if node == nil || !context.inWalk() {
         return
     }
@@ -383,7 +383,7 @@ func (context *rbIterationContext) LessThan(key RbKey) (int, error) {
     return context.CurrentCount(), nil
 }
 
-func (context *rbIterationContext) walkLessThan(node *RbNode, key RbKey) {
+func (context *rbIterationContext) walkLessThan(node *rbNode, key RbKey) {
     if node == nil || !context.inWalk() {
         return
     }
@@ -426,7 +426,7 @@ func (context *rbIterationContext) GreaterThan(key RbKey) (int, error) {
     return context.CurrentCount(), nil
 }
 
-func (context *rbIterationContext) walkGreaterThan(node *RbNode, key RbKey) {
+func (context *rbIterationContext) walkGreaterThan(node *rbNode, key RbKey) {
     if node == nil || !context.inWalk() {
         return
     }
