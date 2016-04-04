@@ -34,17 +34,17 @@ type RbKey interface {
     ComparedTo(key RbKey) KeyComparison
 }
 
-// RbNode structure used for storing key and value pairs
-type RbNode struct {
+// rbNode structure used for storing key and value pairs
+type rbNode struct {
     key RbKey
     value interface{}
     color byte
-    left, right, parent *RbNode
+    left, right, parent *rbNode
 }
 
 // RbTree structure
 type RbTree struct {
-    root *RbNode
+    root *rbNode
     count int
     onInsert KeyValueEvent
     onDelete KeyValueEvent
@@ -61,9 +61,9 @@ func NewRbTree(onInsert, onDelete KeyValueEvent) *RbTree {
     }
 }
 
-// newRbNode creates a new RbNode and returns its address
-func newRbNode(key RbKey, value interface{}) *RbNode {
-    result := &RbNode{
+// newRbNode creates a new rbNode and returns its address
+func newRbNode(key RbKey, value interface{}) *rbNode {
+    result := &rbNode{
         key: key,
         value: value,
         color: red,
@@ -72,17 +72,17 @@ func newRbNode(key RbKey, value interface{}) *RbNode {
 }
 
 // isRed checks if node exists and its color is red
-func isRed(node *RbNode) bool {
+func isRed(node *rbNode) bool {
     return node != nil && node.color == red
 }
 
 // isBlack checks if node exists and its color is black
-func isBlack(node *RbNode) bool { 
+func isBlack(node *rbNode) bool { 
     return node != nil && node.color == black 
 }
 
 // min finds the smallest node key including the given node
-func min(node *RbNode) *RbNode {
+func min(node *rbNode) *rbNode {
     if node != nil {
         for node.left != nil {
             node = node.left
@@ -92,7 +92,7 @@ func min(node *RbNode) *RbNode {
 }
 
 // max finds the greatest node key including the given node
-func max(node *RbNode) *RbNode {
+func max(node *rbNode) *rbNode {
     if node != nil {
         for node.right != nil {
             node = node.right
@@ -102,7 +102,7 @@ func max(node *RbNode) *RbNode {
 }
 
 // floor returns the largest key node in the subtree rooted at x less than or equal to the given key
-func floor(node *RbNode, key RbKey) *RbNode {
+func floor(node *rbNode, key RbKey) *rbNode {
     if node == nil {
         return nil
     }
@@ -122,7 +122,7 @@ func floor(node *RbNode, key RbKey) *RbNode {
 }
 
 // ceilig returns the smallest key node in the subtree rooted at x greater than or equal to the given key
-func ceiling(node *RbNode, key RbKey) *RbNode {  
+func ceiling(node *rbNode, key RbKey) *rbNode {  
     if node == nil {
         return nil
     }
@@ -142,7 +142,7 @@ func ceiling(node *RbNode, key RbKey) *RbNode {
 }
 
 // flipColor switchs the color of the node from red to black or black to red
-func flipColor(node *RbNode) {
+func flipColor(node *rbNode) {
     if node.color == black {
         node.color = red
     } else {
@@ -151,14 +151,14 @@ func flipColor(node *RbNode) {
 }
 
 // colorFlip switchs the color of the node and its children from red to black or black to red
-func colorFlip(node *RbNode) {
+func colorFlip(node *rbNode) {
     flipColor(node)
     flipColor(node.left)
     flipColor(node.right)
 }
 
 // rotateLeft makes a right-leaning link lean to the left
-func rotateLeft(node *RbNode) *RbNode {
+func rotateLeft(node *rbNode) *rbNode {
     child := node.right
     node.right = child.left
     child.left = node
@@ -174,7 +174,7 @@ func rotateLeft(node *RbNode) *RbNode {
 }
 
 // rotateRight makes a left-leaning link lean to the right
-func rotateRight(node *RbNode) *RbNode {
+func rotateRight(node *rbNode) *rbNode {
     child := node.left
     node.left = child.right
     child.right = node
@@ -191,7 +191,7 @@ func rotateRight(node *RbNode) *RbNode {
 
 // moveRedLeft makes node.left or one of its children red,
 // assuming that node is red and both children are black.
-func moveRedLeft(node *RbNode) *RbNode {
+func moveRedLeft(node *rbNode) *rbNode {
     colorFlip(node)
     if isRed(node.right.left) {
         node.right = rotateRight(node.right)
@@ -206,7 +206,7 @@ func moveRedLeft(node *RbNode) *RbNode {
 
 // moveRedRight makes node.right or one of its children red,
 // assuming that node is red and both children are black.
-func moveRedRight(node *RbNode) *RbNode {
+func moveRedRight(node *rbNode) *rbNode {
     colorFlip(node)
     if isRed(node.left.left) {
         node = rotateRight(node)
@@ -216,7 +216,7 @@ func moveRedRight(node *RbNode) *RbNode {
 }
 
 // balance restores red-black tree invariant
-func balance(node *RbNode) *RbNode {
+func balance(node *rbNode) *rbNode {
     if isRed(node.right) {
         node = rotateLeft(node)
     }
@@ -230,7 +230,7 @@ func balance(node *RbNode) *RbNode {
 }
 
 // deleteMin removes the smallest key and associated value from the tree
-func deleteMin(node *RbNode) *RbNode {
+func deleteMin(node *rbNode) *rbNode {
     if node.left == nil {
         return nil
     }    
@@ -309,7 +309,7 @@ func (tree *RbTree) Get(key RbKey) (interface{}, bool) {
 }
 
 // find returns the node if key found, otherwise returns nil 
-func (tree *RbTree) find(key RbKey) *RbNode {
+func (tree *RbTree) find(key RbKey) *rbNode {
     for node := tree.root; node != nil; { 
         switch key.ComparedTo(node.key) {
         case KeyIsLess:
@@ -333,7 +333,7 @@ func (tree *RbTree) Insert(key RbKey, value interface{}) {
 }
 
 // insertNode adds the given key and value into the node
-func (tree *RbTree) insertNode(node *RbNode, key RbKey, value interface{}) *RbNode {
+func (tree *RbTree) insertNode(node *rbNode, key RbKey, value interface{}) *rbNode {
     if node == nil {
         tree.count++
         return newRbNode(key, value)
@@ -366,7 +366,7 @@ func (tree *RbTree) Delete(key RbKey) {
 }
 
 // deleteNode deletes the given key from the node
-func (tree *RbTree) deleteNode(node *RbNode, key RbKey) *RbNode {
+func (tree *RbTree) deleteNode(node *rbNode, key RbKey) *rbNode {
     if node == nil {
         return nil
     }
