@@ -75,3 +75,94 @@ func TestIterate(t *testing.T) {
     runtime.ReadMemStats(mem2)
     fmt.Printf("Mem allocated: %9.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
 }
+
+func TestIterateMap(t *testing.T) {
+    mem1 := new(runtime.MemStats)
+    runtime.ReadMemStats(mem1)
+    
+    t1 := time.Now()
+
+    tree := make(map[RbKey]interface{})
+    for i := 1; i <= 1000000; i++ {
+        key := mapIntKey(i)
+        tree[key] = 10 + i
+    }
+
+    fmt.Printf("Insert map time: %.5f sec\n", float64(time.Now().Sub(t1).Nanoseconds())/float64(time.Second.Nanoseconds()))
+    
+    count := 0
+    t1 = time.Now()
+
+    count = 0
+    for range tree {
+        count++
+    }
+    fmt.Printf("All map completed in: %.5f sec with count %d\n", float64(time.Now().Sub(t1).Nanoseconds())/float64(time.Second.Nanoseconds()), count)
+    
+    t1 = time.Now()
+
+    const zeroOrEqualKey int8 = int8(0)
+    
+    count = 0
+    loKey, hiKey := mapIntKey(0), mapIntKey(2000000)
+    for k := range tree {
+        cmpLo := int8(loKey.ComparedTo(k))
+        cmpHi := int8(hiKey.ComparedTo(k))
+        if cmpLo <= zeroOrEqualKey && cmpHi >= zeroOrEqualKey {
+            count++
+        }
+    }
+    fmt.Printf("Between map completed in: %.5f sec with count %d\n", float64(time.Now().Sub(t1).Nanoseconds())/float64(time.Second.Nanoseconds()), count)
+    
+    t1 = time.Now()
+
+    count = 0
+    key := mapIntKey(900001)
+    for k := range tree {
+        cmp := int8(key.ComparedTo(k))
+        if cmp < zeroOrEqualKey {
+            count++
+        }
+    }
+    fmt.Printf("LessThan map completed in: %.5f sec with count %d\n", float64(time.Now().Sub(t1).Nanoseconds())/float64(time.Second.Nanoseconds()), count)
+    
+    t1 = time.Now()
+
+    count = 0
+    key = mapIntKey(100000)
+    for k := range tree {
+        cmp := int8(key.ComparedTo(k))
+        if cmp > zeroOrEqualKey {
+            count++
+        }
+    }
+    fmt.Printf("GreaterThan map completed in: %.5f sec with count %d\n", float64(time.Now().Sub(t1).Nanoseconds())/float64(time.Second.Nanoseconds()), count)
+    
+    t1 = time.Now()
+
+    count = 0
+    key = mapIntKey(1000000)
+    for k := range tree {
+        cmp := int8(key.ComparedTo(k))
+        if cmp <= zeroOrEqualKey {
+            count++
+        }
+    }
+    fmt.Printf("LessOrEqual map completed in: %.5f sec with count %d\n", float64(time.Now().Sub(t1).Nanoseconds())/float64(time.Second.Nanoseconds()), count)
+    
+    t1 = time.Now()
+
+    count = 0
+    key = mapIntKey(0)
+    for k := range tree {
+        cmp := int8(key.ComparedTo(k))
+        if cmp >= zeroOrEqualKey {
+            count++
+        }
+    }
+    fmt.Printf("GreaterOrEqual map completed in: %.5f sec with count %d\n", float64(time.Now().Sub(t1).Nanoseconds())/float64(time.Second.Nanoseconds()), count)
+    
+    mem2 := new(runtime.MemStats)
+    runtime.ReadMemStats(mem2)
+    fmt.Printf("Mem map allocated: %9.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+}
