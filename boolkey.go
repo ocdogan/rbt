@@ -1,6 +1,6 @@
 package rbt
 
-// BoolKey is the float64 key for RbKey
+// BoolKey is the boolean key for RbKey
 type BoolKey bool
 
 // ComparedTo compares the given RbKey with its self

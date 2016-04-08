@@ -1,6 +1,6 @@
 package rbt
 
-// StringKey is the float64 key for RbKey
+// StringKey is the string key for RbKey
 type StringKey string
 
 // ComparedTo compares the given RbKey with its self

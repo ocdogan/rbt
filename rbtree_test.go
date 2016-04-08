@@ -8,6 +8,8 @@ import (
 )
 
 func TestInsertDeleteAndGet(t *testing.T) {
+    fmt.Println("\nTestInsertDeleteAndGet\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
     mem1 := new(runtime.MemStats)
     runtime.ReadMemStats(mem1)
     
@@ -22,13 +24,16 @@ func TestInsertDeleteAndGet(t *testing.T) {
     t2 := time.Now()
     fmt.Printf("Insert time: %.5f sec\n", float64(t2.Sub(t1).Nanoseconds())/float64(time.Second.Nanoseconds()))
     
+    count := 0
     for i := 0; i < 1500000; i++ {
         key := IntKey(i)
-        tree.Get(&key)
+        if _, ok := tree.Get(&key); ok {
+            count++
+        }
     }
 
     t3 := time.Now()
-    fmt.Printf("Search time: %.5f sec\n", float64(t3.Sub(t2).Nanoseconds())/float64(time.Second.Nanoseconds()))
+    fmt.Printf("Search time: %.5f sec with count %d\n", float64(t3.Sub(t2).Nanoseconds())/float64(time.Second.Nanoseconds()), count)
 
     for i := 1; i < 1000000; i++ {
         key := IntKey(i)
@@ -40,7 +45,11 @@ func TestInsertDeleteAndGet(t *testing.T) {
     
     mem2 := new(runtime.MemStats)
     runtime.ReadMemStats(mem2)
-    fmt.Printf("Mem allocated: %9.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+    if mem2.Sys <= mem1.Sys {
+        fmt.Println("Mem allocated: 0 MB")
+    } else {
+        fmt.Printf("Mem allocated: %.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+    }
 }
 
 type mapIntKey int
@@ -58,6 +67,8 @@ func (ikey mapIntKey) ComparedTo(key RbKey) KeyComparison {
 }
 
 func TestInsertDeleteAndGetMap(t *testing.T) {
+    fmt.Println("\nTestInsertDeleteAndGetMap\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
     mem1 := new(runtime.MemStats)
     runtime.ReadMemStats(mem1)
     
@@ -72,16 +83,17 @@ func TestInsertDeleteAndGetMap(t *testing.T) {
     t2 := time.Now()
     fmt.Printf("Insert map time: %.5f sec\n", float64(t2.Sub(t1).Nanoseconds())/float64(time.Second.Nanoseconds()))
     
+    count := 0
     for i := 0; i < 1500000; i++ {
         key := mapIntKey(i)
-        j, ok := tree[key]
-        if ok && j == i {
-            continue
+        _, ok := tree[key]
+        if ok {
+            count++
         }
     }
 
     t3 := time.Now()
-    fmt.Printf("Search map time: %.5f sec\n", float64(t3.Sub(t2).Nanoseconds())/float64(time.Second.Nanoseconds()))
+    fmt.Printf("Search map time: %.5f sec with count %d\n", float64(t3.Sub(t2).Nanoseconds())/float64(time.Second.Nanoseconds()), count)
 
     for i := 1; i < 1000000; i++ {
         key := mapIntKey(i)
@@ -93,5 +105,9 @@ func TestInsertDeleteAndGetMap(t *testing.T) {
     
     mem2 := new(runtime.MemStats)
     runtime.ReadMemStats(mem2)
-    fmt.Printf("Mem map allocated: %9.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+    if mem2.Sys <= mem1.Sys {
+        fmt.Println("Mem allocated: 0 MB")
+    } else {
+        fmt.Printf("Mem allocated: %.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+    }
 }

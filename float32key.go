@@ -1,6 +1,6 @@
 package rbt
 
-// Float32Key is the float64 key for RbKey
+// Float32Key is the float32 key for RbKey
 type Float32Key float32
 
 // ComparedTo compares the given RbKey with its self

@@ -1,11 +1,11 @@
 package rbt
 
-// Int8Key is the int8 key for RbKey
-type Int8Key int8
+// Uint16Key is the uint16 key for RbKey
+type Uint16Key uint16
 
 // ComparedTo compares the given RbKey with its self
-func (ikey *Int8Key) ComparedTo(key RbKey) KeyComparison {
-    diff := int8(*ikey - *key.(*Int8Key))
+func (ikey *Uint16Key) ComparedTo(key RbKey) KeyComparison {
+    diff := int32(*ikey) - int32(*key.(*Uint16Key))
     switch {
     case diff > 0:
         return KeyIsGreater

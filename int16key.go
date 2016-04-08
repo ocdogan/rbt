@@ -1,6 +1,6 @@
 package rbt
 
-// Int16Key is the float64 key for RbKey
+// Int16Key is the int16 key for RbKey
 type Int16Key int16
 
 // ComparedTo compares the given RbKey with its self

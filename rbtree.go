@@ -46,15 +46,18 @@ type rbNode struct {
 type RbTree struct {
     root *rbNode
     count int
-    onInsert KeyValueEvent
-    onDelete KeyValueEvent
+    onInsert InsertEvent
+    onDelete DeleteEvent
 }
 
-// KeyValueEvent function used on Insert or Delete operations
-type KeyValueEvent func(key RbKey, currValue interface{}) (newValue interface{})
+// DeleteEvent function used on Insert or Delete operations
+type DeleteEvent func(key RbKey, oldValue interface{}) (updatedValue interface{})
+
+// InsertEvent function used on Insert or Delete operations
+type InsertEvent func(key RbKey, oldValue interface{}, newValue interface{}) (updatedValue interface{})
 
 // NewRbTree creates a new RbTree and returns its address
-func NewRbTree(onInsert, onDelete KeyValueEvent) *RbTree {
+func NewRbTree(onInsert InsertEvent, onDelete DeleteEvent) *RbTree {
     return &RbTree{
         onInsert: onInsert,
         onDelete: onDelete,
@@ -310,6 +313,11 @@ func (tree *RbTree) find(key RbKey) *rbNode {
     return nil
 }
 
+// Exists returns the node if key found, otherwise returns nil 
+func (tree *RbTree) Exists(key RbKey) bool {
+    return tree.find(key) != nil
+}
+
 // Insert inserts the given key and value into the tree
 func (tree *RbTree) Insert(key RbKey, value interface{}) {
     if key != nil {
@@ -337,7 +345,7 @@ func (tree *RbTree) insertNode(node *rbNode, key RbKey, value interface{}) *rbNo
         if tree.onInsert == nil {
             node.value = value
         } else {
-            node.value = tree.onInsert(key, value)
+            node.value = tree.onInsert(key, node.value, value)
         }
     }
     return balance(node)
@@ -365,7 +373,7 @@ func (tree *RbTree) deleteNode(node *rbNode, key RbKey) *rbNode {
         node.left = tree.deleteNode(node.left, key)
     } else {
         if cmp == KeysAreEqual && tree.onDelete != nil {
-            value := tree.onInsert(key, node.value)        
+            value := tree.onDelete(key, node.value)
             if value != nil {
                 node.value = value
                 return node

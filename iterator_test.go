@@ -8,6 +8,8 @@ import (
 )
 
 func TestIterate(t *testing.T) {
+    fmt.Println("\nTestIterate\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
     mem1 := new(runtime.MemStats)
     runtime.ReadMemStats(mem1)
     
@@ -73,10 +75,16 @@ func TestIterate(t *testing.T) {
     
     mem2 := new(runtime.MemStats)
     runtime.ReadMemStats(mem2)
-    fmt.Printf("Mem allocated: %9.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+    if mem2.Sys <= mem1.Sys {
+        fmt.Println("Mem allocated: 0 MB")
+    } else {
+        fmt.Printf("Mem allocated: %.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+    }
 }
 
 func TestIterateMap(t *testing.T) {
+    fmt.Println("\nTestIterateMap\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
     mem1 := new(runtime.MemStats)
     runtime.ReadMemStats(mem1)
     
@@ -84,8 +92,7 @@ func TestIterateMap(t *testing.T) {
 
     tree := make(map[RbKey]interface{})
     for i := 1; i <= 1000000; i++ {
-        key := mapIntKey(i)
-        tree[key] = 10 + i
+        tree[mapIntKey(i)] = 10 + i
     }
 
     fmt.Printf("Insert map time: %.5f sec\n", float64(time.Now().Sub(t1).Nanoseconds())/float64(time.Second.Nanoseconds()))
@@ -106,9 +113,7 @@ func TestIterateMap(t *testing.T) {
     count = 0
     loKey, hiKey := mapIntKey(0), mapIntKey(2000000)
     for k := range tree {
-        cmpLo := int8(loKey.ComparedTo(k))
-        cmpHi := int8(hiKey.ComparedTo(k))
-        if cmpLo <= zeroOrEqualKey && cmpHi >= zeroOrEqualKey {
+        if int8(loKey.ComparedTo(k)) <= zeroOrEqualKey && int8(hiKey.ComparedTo(k)) >= zeroOrEqualKey {
             count++
         }
     }
@@ -119,8 +124,7 @@ func TestIterateMap(t *testing.T) {
     count = 0
     key := mapIntKey(900001)
     for k := range tree {
-        cmp := int8(k.ComparedTo(key))
-        if cmp < zeroOrEqualKey {
+        if int8(k.ComparedTo(key)) < zeroOrEqualKey {
             count++
         }
     }
@@ -131,8 +135,7 @@ func TestIterateMap(t *testing.T) {
     count = 0
     key = mapIntKey(100000)
     for k := range tree {
-        cmp := int8(k.ComparedTo(key))
-        if cmp > zeroOrEqualKey {
+        if int8(k.ComparedTo(key)) > zeroOrEqualKey {
             count++
         }
     }
@@ -143,8 +146,7 @@ func TestIterateMap(t *testing.T) {
     count = 0
     key = mapIntKey(1000000)
     for k := range tree {
-        cmp := int8(k.ComparedTo(key))
-        if cmp <= zeroOrEqualKey {
+        if int8(k.ComparedTo(key)) <= zeroOrEqualKey {
             count++
         }
     }
@@ -152,11 +154,10 @@ func TestIterateMap(t *testing.T) {
     
     t1 = time.Now()
 
-    count = 0
+    count = 0 
     key = mapIntKey(0)
     for k := range tree {
-        cmp := int8(k.ComparedTo(key))
-        if cmp >= zeroOrEqualKey {
+        if int8(k.ComparedTo(key)) >= zeroOrEqualKey {
             count++
         }
     }
@@ -164,5 +165,9 @@ func TestIterateMap(t *testing.T) {
     
     mem2 := new(runtime.MemStats)
     runtime.ReadMemStats(mem2)
-    fmt.Printf("Mem map allocated: %9.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+    if mem2.Sys <= mem1.Sys {
+        fmt.Println("Mem allocated: 0 MB")
+    } else {
+        fmt.Printf("Mem allocated: %.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+    }
 }

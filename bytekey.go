@@ -1,6 +1,6 @@
 package rbt
 
-// ByteKey is the float64 key for RbKey
+// ByteKey is the byte key for RbKey
 type ByteKey byte
 
 // ComparedTo compares the given RbKey with its self
