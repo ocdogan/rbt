@@ -75,10 +75,10 @@ func TestIterate(t *testing.T) {
     
     mem2 := new(runtime.MemStats)
     runtime.ReadMemStats(mem2)
-    if mem2.Sys <= mem1.Sys {
-        fmt.Println("Mem allocated: 0 MB")
+    if mem2.Alloc <= mem1.Alloc {
+        fmt.Printf("Mem allocated: 0 MB\n")
     } else {
-        fmt.Printf("Mem allocated: %.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+        fmt.Printf("Mem allocated: %3.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
     }
 }
 
@@ -165,9 +165,9 @@ func TestIterateMap(t *testing.T) {
     
     mem2 := new(runtime.MemStats)
     runtime.ReadMemStats(mem2)
-    if mem2.Sys <= mem1.Sys {
-        fmt.Println("Mem allocated: 0 MB")
+    if mem2.Alloc <= mem1.Alloc {
+        fmt.Printf("Mem map allocated: 0 MB\n")
     } else {
-        fmt.Printf("Mem allocated: %.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
+        fmt.Printf("Mem map allocated: %3.3f MB\n", float64(mem2.Alloc - mem1.Alloc)/(1024*1024))
     }
 }
