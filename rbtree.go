@@ -46,6 +46,7 @@ type rbNode struct {
 type RbTree struct {
     root *rbNode
     count int
+    version uint32
     onInsert InsertEvent
     onDelete DeleteEvent
 }
@@ -326,6 +327,7 @@ func (tree *RbTree) Exists(key RbKey) bool {
 // Insert inserts the given key and value into the tree
 func (tree *RbTree) Insert(key RbKey, value interface{}) {
     if key != nil {
+        tree.version++
         tree.root = tree.insertNode(tree.root, key, value);
         tree.root.color = black
         // tree.root.parent = nil
@@ -358,6 +360,7 @@ func (tree *RbTree) insertNode(node *rbNode, key RbKey, value interface{}) *rbNo
 
 // Delete deletes the given key from the tree
 func (tree *RbTree) Delete(key RbKey) {
+    tree.version++
     tree.root = tree.deleteNode(tree.root, key)
     if tree.root != nil {
         tree.root.color = black

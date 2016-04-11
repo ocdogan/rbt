@@ -43,10 +43,11 @@ type RbIterator interface {
 }
 
 type rbIterationContext struct {
+    sync.Mutex
     tree *RbTree
     count int32
     state int32
-    mtx sync.Mutex
+    version uint32
     callback RbIterationCallback
     data map[string]interface{}
 }
@@ -77,8 +78,8 @@ func (tree *RbTree) NewRbIterator(callback RbIterationCallback) (RbIterator, err
     
     return &rbIterationContext{
         tree: tree,
+        version: tree.version,
         callback: callback,
-        mtx: sync.Mutex{},
         state: iteratorReady,
         data: make(map[string]interface{}),
     }, nil
@@ -109,8 +110,8 @@ func (context *rbIterationContext) Closed() bool {
 }
 
 func (context *rbIterationContext) Close() {
-    context.mtx.Lock()
-    defer context.mtx.Unlock()
+    context.Lock()
+    defer context.Unlock()
 
     context.state = iteratorClosed
     context.callback = nilIterationCallback
@@ -118,15 +119,15 @@ func (context *rbIterationContext) Close() {
 }
 
 func (context *rbIterationContext) ClearData() {
-    context.mtx.Lock()
+    context.Lock()
     context.data = nil
-    context.mtx.Unlock()
+    context.Unlock()
 }
 
 func (context *rbIterationContext) GetData(dataKey string) (interface{}, bool) {
-    context.mtx.Lock()
+    context.Lock()
     data := context.data
-    context.mtx.Unlock()
+    context.Unlock()
     
     if data != nil {
         result, ok := data[dataKey]
@@ -136,9 +137,9 @@ func (context *rbIterationContext) GetData(dataKey string) (interface{}, bool) {
 }
 
 func (context *rbIterationContext) SetData(dataKey string, value interface{}) {
-    context.mtx.Lock()
+    context.Lock()
     data := context.data
-    context.mtx.Unlock()
+    context.Unlock()
     
     if data != nil {
         data[dataKey] = value
@@ -146,9 +147,9 @@ func (context *rbIterationContext) SetData(dataKey string, value interface{}) {
 }
 
 func (context *rbIterationContext) RemoveData(dataKey string) {
-    context.mtx.Lock()
+    context.Lock()
     data := context.data
-    context.mtx.Unlock()
+    context.Unlock()
     
     if data != nil {
         delete(data, dataKey)
@@ -156,8 +157,8 @@ func (context *rbIterationContext) RemoveData(dataKey string) {
 }
 
 func (context *rbIterationContext) checkStateAndGetTree() (*RbTree, error) {
-    context.mtx.Lock()
-    defer context.mtx.Unlock()
+    context.Lock()
+    defer context.Unlock()
     
     switch context.state {
     case iterWalking:
@@ -186,6 +187,7 @@ func (context *rbIterationContext) All() (int, error) {
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
     }(context)
     
+    context.version = tree.version
     context.walkAll(tree.root)
     return context.CurrentCount(), nil
 }
@@ -193,6 +195,10 @@ func (context *rbIterationContext) All() (int, error) {
 func (context *rbIterationContext) walkAll(node *rbNode) {
     if node == nil || !context.inWalk() {
         return
+    }
+    
+    if context.tree == nil || context.version != context.tree.version {
+        panic(ErrEnumeratorModified)
     }
     
     if node.left != nil {
@@ -242,6 +248,7 @@ func (context *rbIterationContext) Between(loKey RbKey, hiKey RbKey) (int, error
         loKey, hiKey = hiKey, loKey
     }
     
+    context.version = tree.version
     context.walkBetween(tree.root, loKey, hiKey)
     return context.CurrentCount(), nil
 }
@@ -249,6 +256,10 @@ func (context *rbIterationContext) Between(loKey RbKey, hiKey RbKey) (int, error
 func (context *rbIterationContext) walkBetween(node *rbNode, loKey RbKey, hiKey RbKey) {
     if node == nil || !context.inWalk() {
         return
+    }
+    
+    if context.tree == nil || context.version != context.tree.version {
+        panic(ErrEnumeratorModified)
     }
     
     cmpLo := int8(loKey.ComparedTo(node.key))
@@ -291,6 +302,7 @@ func (context *rbIterationContext) LessOrEqual(key RbKey) (int, error) {
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
     }(context)
     
+    context.version = tree.version
     context.walkLessOrEqual(tree.root, key)
     return context.CurrentCount(), nil
 }
@@ -298,6 +310,10 @@ func (context *rbIterationContext) LessOrEqual(key RbKey) (int, error) {
 func (context *rbIterationContext) walkLessOrEqual(node *rbNode, key RbKey) {
     if node == nil || !context.inWalk() {
         return
+    }
+    
+    if context.tree == nil || context.version != context.tree.version {
+        panic(ErrEnumeratorModified)
     }
     
     if node.left != nil {
@@ -335,6 +351,7 @@ func (context *rbIterationContext) GreaterOrEqual(key RbKey) (int, error) {
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
     }(context)
     
+    context.version = tree.version
     context.walkGreaterOrEqual(tree.root, key)
     return context.CurrentCount(), nil
 }
@@ -342,6 +359,10 @@ func (context *rbIterationContext) GreaterOrEqual(key RbKey) (int, error) {
 func (context *rbIterationContext) walkGreaterOrEqual(node *rbNode, key RbKey) {
     if node == nil || !context.inWalk() {
         return
+    }
+    
+    if context.tree == nil || context.version != context.tree.version {
+        panic(ErrEnumeratorModified)
     }
     
     cmp := node.key.ComparedTo(key)
@@ -379,6 +400,7 @@ func (context *rbIterationContext) LessThan(key RbKey) (int, error) {
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
     }(context)
     
+    context.version = tree.version
     context.walkLessThan(tree.root, key)
     return context.CurrentCount(), nil
 }
@@ -386,6 +408,10 @@ func (context *rbIterationContext) LessThan(key RbKey) (int, error) {
 func (context *rbIterationContext) walkLessThan(node *rbNode, key RbKey) {
     if node == nil || !context.inWalk() {
         return
+    }
+    
+    if context.tree == nil || context.version != context.tree.version {
+        panic(ErrEnumeratorModified)
     }
     
     if node.left != nil {
@@ -417,11 +443,12 @@ func (context *rbIterationContext) GreaterThan(key RbKey) (int, error) {
     if err != nil {
         return 0, err
     }    
-
+    
     defer func(ctx *rbIterationContext) {
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
     }(context)
     
+    context.version = tree.version
     context.walkGreaterThan(tree.root, key)
     return context.CurrentCount(), nil
 }
@@ -429,6 +456,10 @@ func (context *rbIterationContext) GreaterThan(key RbKey) (int, error) {
 func (context *rbIterationContext) walkGreaterThan(node *rbNode, key RbKey) {
     if node == nil || !context.inWalk() {
         return
+    }
+    
+    if context.tree == nil || context.version != context.tree.version {
+        panic(ErrEnumeratorModified)
     }
     
     if node.key.ComparedTo(key) == KeyIsGreater {

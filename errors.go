@@ -12,6 +12,8 @@ const (
     ErrNoArgumentNil ErrNo = iota + 1
     // ErrNoArgumentNilWithName is used if the named function parameter is nil
     ErrNoArgumentNilWithName
+    // ErrNoEnumeratorModified is used when the tree gets modified while iterating
+    ErrNoEnumeratorModified
     // ErrNoIteratorAlreadyRunning is used if the iterator is already running
     ErrNoIteratorAlreadyRunning
     // ErrNoIteratorClosed is used if the iterator is closed
@@ -23,7 +25,9 @@ const (
 var (
     // ErrArgumentNil used if the function parameter is nil
     ErrArgumentNil = NewError(ErrNoArgumentNil) 
-    // ErrIteratorAlreadyRunning used if the iterator is already iterating
+    // ErrEnumeratorModified is used when the tree gets modified while iterating
+    ErrEnumeratorModified = NewError(ErrNoEnumeratorModified)
+    // ErrIteratorAlreadyRunning used if the iterator is already iterating    
     ErrIteratorAlreadyRunning = NewError(ErrNoIteratorAlreadyRunning)
     // ErrIteratorClosed used if the iterator is closed
     ErrIteratorClosed = NewError(ErrNoIteratorClosed)
@@ -34,6 +38,7 @@ var (
 var errorStr = map[ErrNo]string {
     ErrNoArgumentNil: "Argument cannot be nil.",
     ErrNoArgumentNilWithName: "Argument '%s' cannot be nil.",
+    ErrNoEnumeratorModified: "Enumerator has been modified while iterating.",
     ErrNoIteratorAlreadyRunning: "Iterator already running.",
     ErrNoIteratorClosed: "Iteration context closed.",
     ErrNoIteratorUninitialized: "Iteration context uninitialized.",
