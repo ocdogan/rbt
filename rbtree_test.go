@@ -15,7 +15,7 @@ func TestInsertDeleteAndGet(t *testing.T) {
     
     t1 := time.Now()
 
-    tree := NewRbTree(nil, nil)
+    tree := NewRbTree()
     for i := 0; i < 1000000; i++ {
         key := IntKey(i)
         tree.Insert(&key, 10 + i)

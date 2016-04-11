@@ -57,7 +57,12 @@ type DeleteEvent func(key RbKey, oldValue interface{}) (updatedValue interface{}
 type InsertEvent func(key RbKey, oldValue interface{}, newValue interface{}) (updatedValue interface{})
 
 // NewRbTree creates a new RbTree and returns its address
-func NewRbTree(onInsert InsertEvent, onDelete DeleteEvent) *RbTree {
+func NewRbTree() *RbTree {
+    return &RbTree{}
+}
+
+// NewRbTreeWithEvents creates a new RbTree assigning its insert and delete events and returns its address
+func NewRbTreeWithEvents(onInsert InsertEvent, onDelete DeleteEvent) *RbTree {
     return &RbTree{
         onInsert: onInsert,
         onDelete: onDelete,

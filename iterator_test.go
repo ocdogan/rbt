@@ -15,7 +15,7 @@ func TestIterate(t *testing.T) {
     
     t1 := time.Now()
 
-    tree := NewRbTree(nil, nil)
+    tree := NewRbTree()
     for i := 1; i <= 1000000; i++ {
         key := IntKey(i)
         tree.Insert(&key, 10 + i)
