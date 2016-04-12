@@ -177,18 +177,27 @@ func (context *rbIterationContext) checkStateAndGetTree() (*RbTree, error) {
     return context.tree, nil 
 }
 
-func (context *rbIterationContext) All() (int, error) {
-    tree, err := context.checkStateAndGetTree()        
+func (context *rbIterationContext) checkVersion() {
+    if context.tree == nil || context.version != atomic.LoadUint32(&context.tree.version) {
+        panic(ErrEnumeratorModified)
+    }
+}
+func (context *rbIterationContext) All() (count int, err error) {
+    var tree *RbTree
+    tree, err = context.checkStateAndGetTree()        
     if err != nil {
         return 0, err
     }
     
-    defer func(ctx *rbIterationContext) {
+    defer func(ctx *rbIterationContext) {        
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
+        if r := recover(); r != nil {
+            err = r.(error)
+        } 
     }(context)
     
     context.version = tree.version
-    context.walkAll(tree.root)
+    context.walkAll(tree.root)    
     return context.CurrentCount(), nil
 }
 
@@ -219,7 +228,7 @@ func (context *rbIterationContext) walkAll(node *rbNode) {
     }    
 }
 
-func (context *rbIterationContext) Between(loKey RbKey, hiKey RbKey) (int, error) {
+func (context *rbIterationContext) Between(loKey RbKey, hiKey RbKey) (count int, err error) {
     if loKey == nil {
         return 0, ArgumentNilError("loKey")
     }
@@ -227,13 +236,17 @@ func (context *rbIterationContext) Between(loKey RbKey, hiKey RbKey) (int, error
         return 0, ArgumentNilError("hiKey")
     }
 
-    tree, err := context.checkStateAndGetTree()        
+    var tree *RbTree
+    tree, err = context.checkStateAndGetTree()        
     if err != nil {
         return 0, err
     }    
 
     defer func(ctx *rbIterationContext) {
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
+        if r := recover(); r != nil {
+            err = r.(error)
+        } 
     }(context)
     
     switch loKey.ComparedTo(hiKey) {
@@ -288,18 +301,22 @@ func (context *rbIterationContext) walkBetween(node *rbNode, loKey RbKey, hiKey 
     }
 }
 
-func (context *rbIterationContext) LessOrEqual(key RbKey) (int, error) {
+func (context *rbIterationContext) LessOrEqual(key RbKey) (count int, err error) {
         if key == nil {
         return 0, ArgumentNilError("key")
     }
 
-    tree, err := context.checkStateAndGetTree()        
+    var tree *RbTree
+    tree, err = context.checkStateAndGetTree()        
     if err != nil {
         return 0, err
     }    
 
     defer func(ctx *rbIterationContext) {
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
+        if r := recover(); r != nil {
+            err = r.(error)
+        } 
     }(context)
     
     context.version = tree.version
@@ -337,18 +354,22 @@ func (context *rbIterationContext) walkLessOrEqual(node *rbNode, key RbKey) {
     }
 }
 
-func (context *rbIterationContext) GreaterOrEqual(key RbKey) (int, error) {
+func (context *rbIterationContext) GreaterOrEqual(key RbKey) (count int, err error) {
     if key == nil {
         return 0, ArgumentNilError("key")
     }
 
-    tree, err := context.checkStateAndGetTree()        
+    var tree *RbTree
+    tree, err = context.checkStateAndGetTree()        
     if err != nil {
         return 0, err
     }    
 
     defer func(ctx *rbIterationContext) {
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
+        if r := recover(); r != nil {
+            err = r.(error)
+        } 
     }(context)
     
     context.version = tree.version
@@ -386,18 +407,22 @@ func (context *rbIterationContext) walkGreaterOrEqual(node *rbNode, key RbKey) {
     }    
 }
 
-func (context *rbIterationContext) LessThan(key RbKey) (int, error) {
+func (context *rbIterationContext) LessThan(key RbKey) (count int, err error) {
     if key == nil {
         return 0, ArgumentNilError("key")
     }
 
-    tree, err := context.checkStateAndGetTree()        
+    var tree *RbTree
+    tree, err = context.checkStateAndGetTree()        
     if err != nil {
         return 0, err
     }    
 
     defer func(ctx *rbIterationContext) {
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
+        if r := recover(); r != nil {
+            err = r.(error)
+        } 
     }(context)
     
     context.version = tree.version
@@ -434,18 +459,22 @@ func (context *rbIterationContext) walkLessThan(node *rbNode, key RbKey) {
     }
 }
 
-func (context *rbIterationContext) GreaterThan(key RbKey) (int, error) {
+func (context *rbIterationContext) GreaterThan(key RbKey) (count int, err error) {
     if key == nil {
         return 0, ArgumentNilError("key")
     }
 
-    tree, err := context.checkStateAndGetTree()        
+    var tree *RbTree
+    tree, err = context.checkStateAndGetTree()        
     if err != nil {
         return 0, err
     }    
     
     defer func(ctx *rbIterationContext) {
         atomic.CompareAndSwapInt32(&ctx.state, iterWalking, iteratorReady)
+        if r := recover(); r != nil {
+            err = r.(error)
+        } 
     }(context)
     
     context.version = tree.version
