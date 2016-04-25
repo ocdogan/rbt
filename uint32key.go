@@ -7,9 +7,9 @@ type Uint32Key uint32
 func (ikey *Uint32Key) ComparedTo(key RbKey) KeyComparison {
     diff := int64(*ikey) - int64(*key.(*Uint32Key))
     switch {
-    case diff > 0:
+    case diff > zeroInt64:
         return KeyIsGreater
-    case diff < 0:
+    case diff < zeroInt64:
         return KeyIsLess
     default:
         return KeysAreEqual
